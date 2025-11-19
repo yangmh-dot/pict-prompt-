@@ -1,531 +1,171 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>YouTube 熱門影片抓取工具（指定時間 + 類型）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f5;
-    }
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    h1 {
-      font-size: 1.4rem;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-      margin-bottom: 16px;
-    }
-    label {
-      display: block;
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-    input, button, select {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 8px 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid #d4d4d8;
-      font-size: 0.95rem;
-    }
-    button {
-      background: #2563eb;
-      color: #ffffff;
-      border: none;
-      font-weight: 600;
-    }
-    button:active {
-      opacity: 0.8;
-    }
-    #status {
-      font-size: 0.9rem;
-      margin: 8px 0;
-      color: #4b5563;
-    }
-    .video-item {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 8px 0;
-    }
-    .video-item:last-child {
-      border-bottom: none;
-    }
-    .video-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .video-meta {
-      font-size: 0.8rem;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-    .video-link a {
-      font-size: 0.85rem;
-      text-decoration: none;
-      color: #2563eb;
-      word-break: break-all;
-    }
-    .small-note {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      line-height: 1.4;
-    }
-    @media (min-width: 640px) {
-      .two-cols {
-        display: flex;
-        gap: 12px;
-      }
-      .two-cols > div {
-        flex: 1;
-      }
-      .btn-row {
-        display: flex;
-        gap: 8px;
-      }
-      .btn-row button {
-        width: 100%;
-        margin-bottom: 0;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sora2 Pet Showdown Prompt Generator</title>
+<style>
+    body { font-family: Arial; padding: 20px; background:#f7f7f7; }
+    select, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; }
+    .output { white-space: pre-wrap; background:#fff; padding:15px; border-radius:10px; min-height:80px; }
+    .lang-btn { padding: 8px 14px; margin-bottom: 15px; width:auto; }
+</style>
 </head>
 <body>
-  <main>
-    <h1>YouTube 熱門影片抓取工具（類型 + 時間 + 播放數排行）</h1>
 
-    <div class="card">
-      <div class="small-note" style="margin-bottom:8px;">
-        步驟：<br>
-        1. 先在 Google Cloud 建立 YouTube Data API v3 的 API Key。<br>
-        2. 填入下面的 API Key（只會在你自己的瀏覽器使用）。<br>
-        3. 可自訂條件搜尋，或使用「本週 Shorts Top 50」快捷鍵。<br>
-        4. 關鍵字可以留空，只用地區 + 類別 + 時間來抓熱門影片。
-      </div>
+<button class="lang-btn" onclick="toggleLang()">🌐 切換語言 / Switch Language</button>
 
-      <label for="apiKey">YouTube API Key</label>
-      <input id="apiKey" type="password" placeholder="請貼上你的 API Key" />
+<h2 id="title">🐱🐶 Sora2 寵物對決 Prompt 產生器</h2>
 
-      <!-- 這裡改成「可留空」 -->
-      <label for="query">關鍵字 / 類型（可留空，支援中英文，例如：minecraft shorts, 貓咪 shorts）</label>
-      <input id="query" type="text" value="" />
+<label id="labelCatBreed">貓咪品種</label>
+<select id="catBreed">
+    <option value="tabby cat">虎斑貓 Tabby</option>
+    <option value="British Shorthair">英國短毛貓 British Shorthair</option>
+    <option value="Siamese">沙米貓 Siamese</option>
+    <option value="Bengal cat">豹貓 Bengal</option>
+    <option value="Maine Coon">緬因貓 Maine Coon</option>
+    <option value="Scottish Fold">摺耳貓 Scottish Fold</option>
+    <option value="Persian cat">波斯貓 Persian</option>
+    <option value="Ragdoll">布偶貓 Ragdoll</option>
+</select>
 
-      <!-- 地區 + 類別選項 -->
-      <div class="two-cols">
-        <div>
-          <label for="region">地區（Region）</label>
-          <select id="region">
-            <option value="">不限（Global）</option>
-            <option value="TW">台灣 (TW)</option>
-            <option value="US">美國 (US)</option>
-            <option value="JP">日本 (JP)</option>
-            <option value="KR">韓國 (KR)</option>
-            <option value="GB">英國 (GB)</option>
-            <option value="DE">德國 (DE)</option>
-            <option value="FR">法國 (FR)</option>
-            <option value="IN">印度 (IN)</option>
-            <option value="ID">印尼 (ID)</option>
-            <option value="TH">泰國 (TH)</option>
-            <option value="VN">越南 (VN)</option>
-            <option value="BR">巴西 (BR)</option>
-            <option value="MX">墨西哥 (MX)</option>
-          </select>
-        </div>
-        <div>
-          <label for="category">類別（Category）</label>
-          <select id="category">
-            <option value="">不限（所有類別）</option>
-            <option value="15">寵物與動物 (Pets &amp; Animals)</option>
-            <option value="20">遊戲 (Gaming)</option>
-            <option value="10">音樂 (Music)</option>
-            <option value="24">娛樂 (Entertainment)</option>
-            <option value="23">喜劇 (Comedy)</option>
-            <option value="17">運動 (Sports)</option>
-            <option value="22">人物與部落格 (People &amp; Blogs)</option>
-            <option value="26">教學與生活風格 (Howto &amp; Style)</option>
-            <option value="27">教育 (Education)</option>
-            <option value="28">科學與科技 (Science &amp; Technology)</option>
-            <option value="19">旅遊與活動 (Travel &amp; Events)</option>
-            <option value="2">汽車與交通工具 (Autos &amp; Vehicles)</option>
-            <option value="1">電影與動畫 (Film &amp; Animation)</option>
-            <option value="25">新聞與政治 (News &amp; Politics)</option>
-          </select>
-        </div>
-      </div>
+<label id="labelCatColor">貓咪毛色</label>
+<select id="catColor">
+    <option>gray and white</option>
+    <option>orange tabby</option>
+    <option>solid white</option>
+    <option>solid black</option>
+    <option>brown tabby</option>
+    <option>blue-gray</option>
+    <option>calico</option>
+</select>
 
-      <div class="two-cols">
-        <div>
-          <label for="startDate">開始日期（含）</label>
-          <input id="startDate" type="date" />
-        </div>
-        <div>
-          <label for="endDate">結束日期（含）</label>
-          <input id="endDate" type="date" />
-        </div>
-      </div>
+<label id="labelPuppyBreed">小狗品種</label>
+<select id="puppyBreed">
+    <option>Rottweiler puppy</option>
+    <option>Corgi puppy</option>
+    <option>Golden Retriever puppy</option>
+    <option>Labrador puppy</option>
+    <option>French Bulldog puppy</option>
+    <option>Shiba Inu puppy</option>
+</select>
 
-      <div class="two-cols">
-        <div>
-          <label for="limit">要抓取前幾名（依觀看數排序）</label>
-          <input id="limit" type="number" value="20" min="1" max="50" />
-        </div>
-        <div>
-          <label for="lengthMode">影片長度條件</label>
-          <select id="lengthMode">
-            <option value="any">不限長度</option>
-            <option value="shorts">只要短影片（≤ 60 秒）</option>
-            <option value="custom">自訂長度（≤ N 秒）</option>
-          </select>
-        </div>
-      </div>
+<label id="labelTwist">爆點 (Twist Moment)</label>
+<select id="twist">
+    <option>the puppy suddenly sneezes loudly</option>
+    <option>the cat slips backward dramatically</option>
+    <option>the puppy tries to bark but voice cracks</option>
+    <option>the cat misses a dramatic slap</option>
+    <option>the puppy slips on the floor</option>
+    <option>zoom-out reveals another pet watching them</option>
+    <option>a toy squeaks and both animals freeze</option>
+</select>
 
-      <div id="customSecondsWrapper" style="display:none;">
-        <label for="maxSeconds">自訂長度上限（秒）</label>
-        <input id="maxSeconds" type="number" min="1" value="60" />
-      </div>
+<button onclick="generate()" id="btnGenerate">產生 Sora2 Prompt</button>
+<button onclick="copyPrompt()" id="btnCopy">複製 Prompt</button>
 
-      <div class="btn-row" style="display:flex; flex-direction:column; gap:8px;">
-        <button id="searchBtn" type="button">依上方條件搜尋</button>
-        <button id="weeklyShortsBtn" type="button">
-          本週 Shorts Top 50（可有關鍵字，也可留空）
-        </button>
-      </div>
-      <div id="status"></div>
-    </div>
+<div class="output" id="output"></div>
 
-    <div class="card">
-      <h2 style="font-size:1rem; margin-top:0;">搜尋結果</h2>
-      <div id="results"></div>
-    </div>
+<script>
+// ----------------------------------------------------
+// Language System (中文 <-> English UI Switch)
+// ----------------------------------------------------
+let currentLang = "zh";
 
-    <div class="small-note">
-      ※ 提醒：這是純前端工具，API Key 會在瀏覽器端使用，<br>
-      建議在 Google Cloud 中，把金鑰限制在你的 GitHub Pages 網域。
-    </div>
-  </main>
-
-  <script>
-    const apiKeyInput = document.getElementById("apiKey");
-    const queryInput = document.getElementById("query");
-    const regionSelect = document.getElementById("region");
-    const categorySelect = document.getElementById("category");
-    const startDateInput = document.getElementById("startDate");
-    const endDateInput = document.getElementById("endDate");
-    const limitInput = document.getElementById("limit");
-    const lengthModeSelect = document.getElementById("lengthMode");
-    const customSecondsWrapper = document.getElementById("customSecondsWrapper");
-    const maxSecondsInput = document.getElementById("maxSeconds");
-    const searchBtn = document.getElementById("searchBtn");
-    const weeklyShortsBtn = document.getElementById("weeklyShortsBtn");
-    const statusDiv = document.getElementById("status");
-    const resultsDiv = document.getElementById("results");
-
-    // 載入 localStorage 裡的 API Key
-    (function loadApiKeyFromStorage() {
-      const savedKey = localStorage.getItem("yt_api_key");
-      if (savedKey) {
-        apiKeyInput.value = savedKey;
-      }
-    })();
-
-    apiKeyInput.addEventListener("change", () => {
-      localStorage.setItem("yt_api_key", apiKeyInput.value.trim());
-    });
-
-    // 切換「自訂秒數」輸入欄位顯示/隱藏
-    lengthModeSelect.addEventListener("change", () => {
-      if (lengthModeSelect.value === "custom") {
-        customSecondsWrapper.style.display = "block";
-      } else {
-        customSecondsWrapper.style.display = "none";
-      }
-    });
-
-    // 工具：把 Date 轉成 yyyy-mm-dd 給 <input type="date">
-    function toDateInputValue(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+const uiText = {
+    zh: {
+        title: "🐱🐶 Sora2 寵物對決 Prompt 產生器",
+        labelCatBreed: "貓咪品種",
+        labelCatColor: "貓咪毛色",
+        labelPuppyBreed: "小狗品種",
+        labelTwist: "爆點 (Twist Moment)",
+        btnGenerate: "產生 Sora2 Prompt",
+        btnCopy: "複製 Prompt",
+        msgNoPrompt: "請先產生 Prompt 再複製喔！",
+        msgCopied: "已複製到剪貼簿 ✅"
+    },
+    en: {
+        title: "🐱🐶 Sora2 Pet Showdown Prompt Generator",
+        labelCatBreed: "Cat Breed",
+        labelCatColor: "Cat Fur Color",
+        labelPuppyBreed: "Puppy Breed",
+        labelTwist: "Twist Moment",
+        btnGenerate: "Generate Sora2 Prompt",
+        btnCopy: "Copy Prompt",
+        msgNoPrompt: "Please generate a prompt first!",
+        msgCopied: "Copied to clipboard ✅"
     }
+};
 
-    // 一般「依上方條件搜尋」按鈕
-    searchBtn.addEventListener("click", async () => {
-      const apiKey = apiKeyInput.value.trim();
-      const query = queryInput.value.trim();  // 可為空字串
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-      const limit = parseInt(limitInput.value, 10) || 10;
-      const lengthMode = lengthModeSelect.value;
-      const maxSeconds = parseInt(maxSecondsInput.value, 10) || null;
-      const regionCode = regionSelect.value;
-      const categoryId = categorySelect.value || null;
+function toggleLang() {
+    currentLang = currentLang === "zh" ? "en" : "zh";
+    const lang = uiText[currentLang];
 
-      if (!apiKey) {
-        alert("請先填入 YouTube API Key");
+    document.getElementById("title").innerText = lang.title;
+    document.getElementById("labelCatBreed").innerText = lang.labelCatBreed;
+    document.getElementById("labelCatColor").innerText = lang.labelCatColor;
+    document.getElementById("labelPuppyBreed").innerText = lang.labelPuppyBreed;
+    document.getElementById("labelTwist").innerText = lang.labelTwist;
+    document.getElementById("btnGenerate").innerText = lang.btnGenerate;
+    document.getElementById("btnCopy").innerText = lang.btnCopy;
+}
+
+// ----------------------------------------------------
+// Prompt Generator
+// ----------------------------------------------------
+function generate() {
+    const catBreed = document.getElementById("catBreed").value;
+    const catColor = document.getElementById("catColor").value;
+    const puppyBreed = document.getElementById("puppyBreed").value;
+    const twist = document.getElementById("twist").value;
+
+    const prompt = `
+Inside a cozy modern living room, a ${catBreed} with ${catColor} fur raises one paw like a tiny kung-fu master, facing a baby ${puppyBreed} crouching on the shiny wooden floor.
+The cat leans in dramatically while the puppy tries to look brave but wiggles nervously.
+Suddenly, ${twist}.
+Add comedic tension, hyper-realistic fur textures, warm indoor lighting, fast zoom reactions, expressive faces, and high-energy pacing.
+Perfect for a 10-second 9:16 YouTube Shorts clip.
+    `;
+
+    document.getElementById("output").innerText = prompt.trim();
+}
+
+// ----------------------------------------------------
+// One-click Copy Prompt
+// ----------------------------------------------------
+function copyPrompt() {
+    const text = document.getElementById("output").innerText.trim();
+    const lang = uiText[currentLang];
+
+    if (!text) {
+        alert(lang.msgNoPrompt);
         return;
-      }
-      if (!startDate || !endDate) {
-        alert("請選擇開始日期與結束日期");
-        return;
-      }
-      if (lengthMode === "custom" && (!maxSeconds || maxSeconds <= 0)) {
-        alert("請輸入有效的自訂長度上限（秒）");
-        return;
-      }
-
-      statusDiv.textContent = "搜尋中，請稍候……";
-      resultsDiv.innerHTML = "";
-
-      try {
-        const videos = await searchTopVideos({
-          apiKey,
-          query,
-          startDate,
-          endDate,
-          limit,
-          lengthMode,
-          maxSeconds,
-          regionCode,
-          categoryId
-        });
-
-        if (!videos.length) {
-          statusDiv.textContent = "找不到符合條件的影片。";
-          return;
-        }
-
-        statusDiv.textContent = `共取得 ${videos.length} 部影片（依觀看數由高到低）。`;
-        renderResults(videos);
-      } catch (err) {
-        console.error(err);
-        statusDiv.textContent = "發生錯誤：" + (err.message || err.toString());
-      }
-    });
-
-    // 「本週 Shorts Top 50」快捷按鈕（關鍵字可以留空）
-    weeklyShortsBtn.addEventListener("click", () => {
-      const apiKey = apiKeyInput.value.trim();
-      const query = queryInput.value.trim(); // 可為空
-
-      if (!apiKey) {
-        alert("請先填入 YouTube API Key");
-        return;
-      }
-
-      const today = new Date();
-      const weekAgo = new Date();
-      weekAgo.setDate(today.getDate() - 6); // 今天 + 往前 6 天 = 7 天區間
-
-      const startDate = toDateInputValue(weekAgo);
-      const endDate = toDateInputValue(today);
-
-      // 更新畫面上的日期 & 條件，讓你看得到設定
-      startDateInput.value = startDate;
-      endDateInput.value = endDate;
-
-      limitInput.value = 50;                 // Top 50
-      lengthModeSelect.value = "shorts";     // 只抓短影片
-      lengthModeSelect.dispatchEvent(new Event("change")); // 更新 UI 顯示
-
-      statusDiv.textContent = `搜尋中：本週（${startDate} ~ ${endDate}）Shorts Top 50…`;
-      resultsDiv.innerHTML = "";
-
-      // 直接呼叫一般搜尋邏輯
-      searchBtn.click();
-    });
-
-    /**
-     * 呼叫 YouTube API 找出指定條件的熱門影片
-     * options = { apiKey, query, startDate, endDate, limit, lengthMode, maxSeconds, regionCode, categoryId }
-     */
-    async function searchTopVideos(options) {
-      const {
-        apiKey,
-        query,
-        startDate,
-        endDate,
-        limit,
-        lengthMode,
-        maxSeconds,
-        regionCode,
-        categoryId
-      } = options;
-
-      const searchBase = "https://www.googleapis.com/youtube/v3/search";
-      const videosBase = "https://www.googleapis.com/youtube/v3/videos";
-
-      // 把日期轉成 ISO 8601（UTC）
-      const publishedAfter = new Date(startDate + "T00:00:00Z").toISOString();
-      const publishedBefore = new Date(endDate + "T23:59:59Z").toISOString();
-
-      const params = new URLSearchParams({
-        key: apiKey,
-        part: "id",
-        type: "video",
-        maxResults: "50",      // 一次最多 50
-        order: "viewCount",    // 依觀看數排序
-        publishedAfter,
-        publishedBefore
-      });
-
-      // 關鍵字可留空，如果有才帶 q
-      if (query && query.length > 0) {
-        params.set("q", query);
-      }
-
-      // 地區條件
-      if (regionCode) {
-        params.set("regionCode", regionCode);
-      }
-
-      // 類別條件（YouTube 影片類別 ID）
-      if (categoryId) {
-        params.set("videoCategoryId", categoryId);
-      }
-
-      // 如果是「只要短影片」，先用官方的 short 篩一次，減少後端資料量
-      if (lengthMode === "shorts") {
-        params.set("videoDuration", "short"); // 官方定義短影片
-      }
-
-      const searchUrl = `${searchBase}?${params.toString()}`;
-      const searchRes = await fetch(searchUrl);
-      const searchJson = await searchRes.json();
-
-      if (!searchRes.ok) {
-        throw new Error(searchJson.error?.message || "YouTube search API 錯誤");
-      }
-
-      const items = searchJson.items || [];
-      const videoIds = items
-        .map((item) => item.id && item.id.videoId)
-        .filter(Boolean);
-
-      if (!videoIds.length) return [];
-
-      // 用 videos.list 一次撈所有 videoId 的詳細資訊（包含 duration）
-      const videosParams = new URLSearchParams({
-        key: apiKey,
-        part: "snippet,statistics,contentDetails",
-        id: videoIds.join(",")
-      });
-
-      const videosUrl = `${videosBase}?${videosParams.toString()}`;
-      const videosRes = await fetch(videosUrl);
-      const videosJson = await videosRes.json();
-
-      if (!videosRes.ok) {
-        throw new Error(videosJson.error?.message || "YouTube videos API 錯誤");
-      }
-
-      let videoData = (videosJson.items || []).map((item) => {
-        const stats = item.statistics || {};
-        const snippet = item.snippet || {};
-        const contentDetails = item.contentDetails || {};
-        const durationISO = contentDetails.duration || null;
-        const durationSeconds = durationISO ? parseISODurationToSeconds(durationISO) : null;
-        const viewCount = Number(stats.viewCount || 0);
-
-        return {
-          id: item.id,
-          title: snippet.title || "(無標題)",
-          channel: snippet.channelTitle || "",
-          publishedAt: snippet.publishedAt || "",
-          views: viewCount,
-          durationSeconds,
-          url: `https://www.youtube.com/watch?v=${item.id}`
-        };
-      });
-
-      // 前端再做一次「長度條件」篩選
-      if (lengthMode === "shorts") {
-        // 安全起見，再用 <= 60 秒確認一次
-        videoData = videoData.filter(
-          (v) => v.durationSeconds != null && v.durationSeconds <= 60
-        );
-      } else if (lengthMode === "custom" && maxSeconds != null) {
-        videoData = videoData.filter(
-          (v) => v.durationSeconds != null && v.durationSeconds <= maxSeconds
-        );
-      }
-
-      // 依觀看數排序，取前 N 名
-      videoData.sort((a, b) => b.views - a.views);
-      return videoData.slice(0, limit);
     }
 
-    function renderResults(videos) {
-      resultsDiv.innerHTML = "";
-
-      videos.forEach((v, index) => {
-        const div = document.createElement("div");
-        div.className = "video-item";
-
-        const title = document.createElement("div");
-        title.className = "video-title";
-        title.textContent = `${index + 1}. ${v.title}`;
-
-        const meta = document.createElement("div");
-        meta.className = "video-meta";
-        meta.textContent =
-          `頻道：${v.channel || "未知"} ｜ ` +
-          `觀看數：${v.views.toLocaleString()} ｜ ` +
-          `時長：${formatDuration(v.durationSeconds)} ｜ ` +
-          `上架時間：${formatDateTime(v.publishedAt)}`;
-
-        const linkDiv = document.createElement("div");
-        linkDiv.className = "video-link";
-        const a = document.createElement("a");
-        a.href = v.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = v.url;
-        linkDiv.appendChild(a);
-
-        div.appendChild(title);
-        div.appendChild(meta);
-        div.appendChild(linkDiv);
-
-        resultsDiv.appendChild(div);
-      });
+    // 優先使用 Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => alert(lang.msgCopied))
+            .catch(() => fallbackCopy(text, lang.msgCopied));
+    } else {
+        fallbackCopy(text, lang.msgCopied);
     }
+}
 
-    // 解析 ISO 8601 duration（例如 PT1M23S）成秒數
-    function parseISODurationToSeconds(iso) {
-      const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
-      const match = iso.match(regex);
-      if (!match) return null;
-      const hours = parseInt(match[1] || "0", 10);
-      const minutes = parseInt(match[2] || "0", 10);
-      const seconds = parseInt(match[3] || "0", 10);
-      return hours * 3600 + minutes * 60 + seconds;
-    }
+function fallbackCopy(text, msgCopied) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand("copy");
+    } catch (e) {}
+    document.body.removeChild(textarea);
+    alert(msgCopied);
+}
+</script>
 
-    function formatDuration(sec) {
-      if (sec == null || isNaN(sec)) return "未知";
-      return `${sec} 秒`;
-    }
-
-    function formatDateTime(isoString) {
-      if (!isoString) return "";
-      const d = new Date(isoString);
-      if (Number.isNaN(d.getTime())) return isoString;
-      return d.toLocaleString("zh-TW");
-    }
-  </script>
 </body>
 </html>
