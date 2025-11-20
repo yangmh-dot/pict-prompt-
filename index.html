@@ -1,171 +1,563 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sora2 Pet Showdown Prompt Generator</title>
-<style>
-    body { font-family: Arial; padding: 20px; background:#f7f7f7; }
-    select, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; }
-    .output { white-space: pre-wrap; background:#fff; padding:15px; border-radius:10px; min-height:80px; }
-    .lang-btn { padding: 8px 14px; margin-bottom: 15px; width:auto; }
-</style>
+  <meta charset="UTF-8" />
+  <title>動物陷阱情節 Sora Prompt 產生器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: #f5f5f5;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #b0b0b0;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #1b1b1b;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+    .section-title {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title span {
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: normal;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .field {
+      flex: 1 1 150px;
+      min-width: 130px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: #cccccc;
+    }
+    select,
+    button,
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #101010;
+      color: #f5f5f5;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    select:focus,
+    textarea:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 1px;
+      border-color: transparent;
+    }
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .radio-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .radio-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: #101010;
+      border-radius: 999px;
+      border: 1px solid #333;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .radio-pill input {
+      accent-color: #3b82f6;
+    }
+    .radio-pill.active {
+      border-color: #3b82f6;
+      background: #111827;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1 1 120px;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-secondary {
+      background: #262626;
+      color: #f5f5f5;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #555;
+      color: #e5e5e5;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #27272a;
+      font-size: 0.7rem;
+      color: #a1a1aa;
+      margin-left: 4px;
+    }
+    .footer-note {
+      font-size: 0.75rem;
+      color: #777;
+      text-align: center;
+      margin-top: 8px;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+      .card {
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>動物陷阱情節 Sora Prompt 產生器</h1>
+    <div class="subtitle">
+      中文操作介面，輸出高張力英文 Prompt（10 秒 · 9:16 · 無慢動作 · 可循環）
+    </div>
 
-<button class="lang-btn" onclick="toggleLang()">🌐 切換語言 / Switch Language</button>
+    <!-- 動物類型 -->
+    <div class="card">
+      <div class="section-title">
+        動物分類
+        <span>先選類型，再選具體動物</span>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>動物類型</label>
+          <div class="radio-group" id="animalTypeGroup">
+            <label class="radio-pill active">
+              <input
+                type="radio"
+                name="animalType"
+                value="ferocious"
+                checked
+              />
+              凶猛動物
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="animalType" value="pet" />
+              貓狗老鼠
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label>動物（可留空交給「隨機」）</label>
+          <select id="animalSelect">
+            <!-- 由 JS 動態填入 -->
+          </select>
+        </div>
+      </div>
+    </div>
 
-<h2 id="title">🐱🐶 Sora2 寵物對決 Prompt 產生器</h2>
+    <!-- 場景與陷阱 -->
+    <div class="card">
+      <div class="section-title">
+        場景與陷阱設計
+        <span>不填就會自動隨機</span>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>場景</label>
+          <select id="sceneSelect">
+            <option value="">（隨機）</option>
+            <option value="dense forest">陰暗茂密森林</option>
+            <option value="open desert">開闊沙漠</option>
+            <option value="snowy mountain valley">雪地山谷</option>
+            <option value="savanna plain">草原平地</option>
+            <option value="city park">城市公園</option>
+            <option value="bright living room">明亮客廳</option>
+            <option value="apartment balcony">公寓陽台</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>陷阱類型</label>
+          <select id="trapSelect">
+            <option value="">（隨機）</option>
+            <option value="a deep pit filled with wooden spikes">
+              深洞木刺陷阱
+            </option>
+            <option value="a rotating wooden wheel lined with sharpened stakes">
+              旋轉木刺輪
+            </option>
+            <option value="a collapsing fake floor that reveals sharp spikes">
+              假地板塌陷陷阱
+            </option>
+            <option value="two wooden doors with spikes that almost slam shut">
+              夾擊木門尖刺陷阱
+            </option>
+            <option value="a hanging meat lure above a bed of spikes">
+              肉吊在尖刺床上方
+            </option>
+            <option value="a vibrating wooden plate covered in short spikes">
+              會震動的木刺平台
+            </option>
+          </select>
+        </div>
+        <div class="field">
+          <label>情緒氛圍</label>
+          <select id="moodSelect">
+            <option value="">（隨機）</option>
+            <option value="tense and thrilling">
+              緊張刺激
+            </option>
+            <option value="darkly humorous yet dangerous">
+              黑色幽默又帶危險
+            </option>
+            <option value="playful but risky">
+              調皮但有風險
+            </option>
+            <option value="suspenseful and cinematic">
+              懸疑電影感
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-<label id="labelCatBreed">貓咪品種</label>
-<select id="catBreed">
-    <option value="tabby cat">虎斑貓 Tabby</option>
-    <option value="British Shorthair">英國短毛貓 British Shorthair</option>
-    <option value="Siamese">沙米貓 Siamese</option>
-    <option value="Bengal cat">豹貓 Bengal</option>
-    <option value="Maine Coon">緬因貓 Maine Coon</option>
-    <option value="Scottish Fold">摺耳貓 Scottish Fold</option>
-    <option value="Persian cat">波斯貓 Persian</option>
-    <option value="Ragdoll">布偶貓 Ragdoll</option>
-</select>
+    <!-- 視覺風格 -->
+    <div class="card">
+      <div class="section-title">
+        拍攝與畫面風格
+        <span>自動幫你寫進 Prompt</span>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>鏡頭風格</label>
+          <select id="cameraSelect">
+            <option value="">（隨機）</option>
+            <option value="dynamic handheld shots with close-ups on the animal's face">
+              動態手持特寫
+            </option>
+            <option value="smooth tracking shots following the animal's movements">
+              平滑跟拍鏡頭
+            </option>
+            <option value="cinematic close-ups on the claws and meat lure">
+              爪子與誘餌特寫
+            </option>
+            <option value="slight wide-angle shot showing the full trap and environment">
+              廣角全景構圖
+            </option>
+          </select>
+        </div>
+        <div class="field">
+          <label>畫面細節</label>
+          <select id="detailSelect">
+            <option value="">（隨機）</option>
+            <option value="hyper-realistic textures, detailed fur, realistic lighting">
+              超寫實毛髮與光影
+            </option>
+            <option value="4K cinematic look, shallow depth of field, filmic contrast">
+              4K 電影感、淺景深
+            </option>
+            <option value="natural daylight, soft shadows, dust particles in the air">
+              自然日光與空氣微塵
+            </option>
+            <option value="dramatic lighting emphasizing the spikes and the animal's eyes">
+              強調尖刺與眼神的戲劇光
+            </option>
+          </select>
+        </div>
+        <div class="field">
+          <label>影片長度與比例 <span class="badge">固定</span></label>
+          <select disabled>
+            <option>10 秒 · 9:16 · 無慢動作 · 可首尾循環</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="randomBtn">
+          🎲 隨機全部
+        </button>
+        <button class="btn btn-primary" id="generateBtn">
+          ⚙️ 產生英文 Prompt
+        </button>
+      </div>
+    </div>
 
-<label id="labelCatColor">貓咪毛色</label>
-<select id="catColor">
-    <option>gray and white</option>
-    <option>orange tabby</option>
-    <option>solid white</option>
-    <option>solid black</option>
-    <option>brown tabby</option>
-    <option>blue-gray</option>
-    <option>calico</option>
-</select>
+    <!-- 輸出區 -->
+    <div class="card">
+      <div class="section-title">
+        英文 Prompt 輸出
+        <span>直接貼給 Sora / 其他影片模型</span>
+      </div>
+      <textarea
+        id="promptOutput"
+        placeholder="按下「產生英文 Prompt」後會顯示在這裡"
+      ></textarea>
+      <div class="btn-row">
+        <button class="btn btn-outline" id="copyBtn">
+          📋 一鍵複製 Prompt
+        </button>
+      </div>
+      <div class="footer-note">
+        小提示：為了 Shorts 循環播放，程式會自動在描述中加入「seamless loop」與「the final frame can connect back to the first frame」等字眼。
+      </div>
+    </div>
 
-<label id="labelPuppyBreed">小狗品種</label>
-<select id="puppyBreed">
-    <option>Rottweiler puppy</option>
-    <option>Corgi puppy</option>
-    <option>Golden Retriever puppy</option>
-    <option>Labrador puppy</option>
-    <option>French Bulldog puppy</option>
-    <option>Shiba Inu puppy</option>
-</select>
+    <div class="footer-note">
+      Made for GitHub Pages · UI in Chinese · Prompt in English
+    </div>
+  </div>
 
-<label id="labelTwist">爆點 (Twist Moment)</label>
-<select id="twist">
-    <option>the puppy suddenly sneezes loudly</option>
-    <option>the cat slips backward dramatically</option>
-    <option>the puppy tries to bark but voice cracks</option>
-    <option>the cat misses a dramatic slap</option>
-    <option>the puppy slips on the floor</option>
-    <option>zoom-out reveals another pet watching them</option>
-    <option>a toy squeaks and both animals freeze</option>
-</select>
+  <script>
+    // 動物資料
+    const animalOptions = {
+      ferocious: [
+        { key: "tiger", label: "老虎", en: "a tiger" },
+        { key: "leopard", label: "花豹", en: "a leopard" },
+        { key: "cheetah", label: "獵豹", en: "a cheetah" },
+        { key: "lion", label: "獅子", en: "a lion" },
+        { key: "snow_leopard", label: "雪豹", en: "a snow leopard" }
+      ],
+      pet: [
+        { key: "house_cat", label: "家貓", en: "a house cat" },
+        { key: "stray_cat", label: "流浪貓", en: "a stray cat" },
+        { key: "small_dog", label: "小型狗狗", en: "a small dog" },
+        { key: "big_dog", label: "中大型狗狗", en: "a large dog" },
+        { key: "mouse", label: "小老鼠", en: "a small mouse" }
+      ]
+    };
 
-<button onclick="generate()" id="btnGenerate">產生 Sora2 Prompt</button>
-<button onclick="copyPrompt()" id="btnCopy">複製 Prompt</button>
+    const animalTypeGroup = document.getElementById("animalTypeGroup");
+    const animalSelect = document.getElementById("animalSelect");
 
-<div class="output" id="output"></div>
+    const sceneSelect = document.getElementById("sceneSelect");
+    const trapSelect = document.getElementById("trapSelect");
+    const moodSelect = document.getElementById("moodSelect");
+    const cameraSelect = document.getElementById("cameraSelect");
+    const detailSelect = document.getElementById("detailSelect");
 
-<script>
-// ----------------------------------------------------
-// Language System (中文 <-> English UI Switch)
-// ----------------------------------------------------
-let currentLang = "zh";
+    const randomBtn = document.getElementById("randomBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const promptOutput = document.getElementById("promptOutput");
 
-const uiText = {
-    zh: {
-        title: "🐱🐶 Sora2 寵物對決 Prompt 產生器",
-        labelCatBreed: "貓咪品種",
-        labelCatColor: "貓咪毛色",
-        labelPuppyBreed: "小狗品種",
-        labelTwist: "爆點 (Twist Moment)",
-        btnGenerate: "產生 Sora2 Prompt",
-        btnCopy: "複製 Prompt",
-        msgNoPrompt: "請先產生 Prompt 再複製喔！",
-        msgCopied: "已複製到剪貼簿 ✅"
-    },
-    en: {
-        title: "🐱🐶 Sora2 Pet Showdown Prompt Generator",
-        labelCatBreed: "Cat Breed",
-        labelCatColor: "Cat Fur Color",
-        labelPuppyBreed: "Puppy Breed",
-        labelTwist: "Twist Moment",
-        btnGenerate: "Generate Sora2 Prompt",
-        btnCopy: "Copy Prompt",
-        msgNoPrompt: "Please generate a prompt first!",
-        msgCopied: "Copied to clipboard ✅"
+    // 依照目前類型填入動物選單
+    function populateAnimals(type) {
+      const list = animalOptions[type] || [];
+      animalSelect.innerHTML = '<option value="">（隨機）</option>';
+      list.forEach((a) => {
+        const opt = document.createElement("option");
+        opt.value = a.key;
+        opt.textContent = a.label;
+        animalSelect.appendChild(opt);
+      });
     }
-};
 
-function toggleLang() {
-    currentLang = currentLang === "zh" ? "en" : "zh";
-    const lang = uiText[currentLang];
+    // 取得目前選到的動物英文描述
+    function getSelectedAnimalEn() {
+      const type = getCurrentAnimalType();
+      const key = animalSelect.value;
+      const list = animalOptions[type] || [];
+      if (!key) {
+        // 隨機選
+        return randomFromArray(list).en;
+      }
+      const found = list.find((a) => a.key === key);
+      return found ? found.en : randomFromArray(list).en;
+    }
 
-    document.getElementById("title").innerText = lang.title;
-    document.getElementById("labelCatBreed").innerText = lang.labelCatBreed;
-    document.getElementById("labelCatColor").innerText = lang.labelCatColor;
-    document.getElementById("labelPuppyBreed").innerText = lang.labelPuppyBreed;
-    document.getElementById("labelTwist").innerText = lang.labelTwist;
-    document.getElementById("btnGenerate").innerText = lang.btnGenerate;
-    document.getElementById("btnCopy").innerText = lang.btnCopy;
-}
+    function getCurrentAnimalType() {
+      const radios = animalTypeGroup.querySelectorAll("input[name='animalType']");
+      for (const r of radios) {
+        if (r.checked) return r.value;
+      }
+      return "ferocious";
+    }
 
-// ----------------------------------------------------
-// Prompt Generator
-// ----------------------------------------------------
-function generate() {
-    const catBreed = document.getElementById("catBreed").value;
-    const catColor = document.getElementById("catColor").value;
-    const puppyBreed = document.getElementById("puppyBreed").value;
-    const twist = document.getElementById("twist").value;
+    function randomFromArray(arr) {
+      if (!arr || arr.length === 0) return "";
+      const idx = Math.floor(Math.random() * arr.length);
+      return arr[idx];
+    }
 
-    const prompt = `
-Inside a cozy modern living room, a ${catBreed} with ${catColor} fur raises one paw like a tiny kung-fu master, facing a baby ${puppyBreed} crouching on the shiny wooden floor.
-The cat leans in dramatically while the puppy tries to look brave but wiggles nervously.
-Suddenly, ${twist}.
-Add comedic tension, hyper-realistic fur textures, warm indoor lighting, fast zoom reactions, expressive faces, and high-energy pacing.
-Perfect for a 10-second 9:16 YouTube Shorts clip.
-    `;
+    function ensureValue(selectEl) {
+      if (selectEl.value) return selectEl.value;
+      const opts = Array.from(selectEl.options)
+        .map((o) => o.value)
+        .filter((v) => v);
+      if (opts.length === 0) return "";
+      return randomFromArray(opts);
+    }
 
-    document.getElementById("output").innerText = prompt.trim();
-}
+    function buildPrompt() {
+      const animalEn = getSelectedAnimalEn();
+      const scene = ensureValue(sceneSelect);
+      const trap = ensureValue(trapSelect);
+      const mood = ensureValue(moodSelect);
+      const camera = ensureValue(cameraSelect);
+      const detail = ensureValue(detailSelect);
 
-// ----------------------------------------------------
-// One-click Copy Prompt
-// ----------------------------------------------------
-function copyPrompt() {
-    const text = document.getElementById("output").innerText.trim();
-    const lang = uiText[currentLang];
+      const type = getCurrentAnimalType();
+      const categoryPhrase =
+        type === "ferocious"
+          ? "a dangerous wild predator"
+          : "a domestic animal behaving bravely like a predator";
 
-    if (!text) {
-        alert(lang.msgNoPrompt);
+      const parts = [];
+
+      parts.push(
+        `A 10-second 9:16 hyper-realistic video of ${animalEn} in ${scene}, carefully trying to grab a piece of meat lure hanging above ${trap}.`
+      );
+      parts.push(
+        `The animal is ${categoryPhrase}, moving slowly and cautiously at first, then suddenly making quick risky moves with its paw to reach the bait without falling into the trap.`
+      );
+      parts.push(
+        `Camera style: ${camera}. Visual style: ${detail}. Overall mood is ${mood}.`
+      );
+      parts.push(
+        "Natural realtime motion, no slow motion, no time warp."
+      );
+      parts.push(
+        "The scene is tense but not gory, focusing on the animal's intelligence, hesitation, and near-miss moments with the spikes."
+      );
+      parts.push(
+        "Designed as a seamless loop, so the final frame can connect perfectly back to the first frame, ideal for vertical short video."
+      );
+
+      return parts.join(" ");
+    }
+
+    // 事件：切換動物類型
+    animalTypeGroup.addEventListener("change", (e) => {
+      if (e.target.name === "animalType") {
+        const type = e.target.value;
+        // 更新 UI 樣式
+        const pills = animalTypeGroup.querySelectorAll(".radio-pill");
+        pills.forEach((pill) => {
+          const input = pill.querySelector("input");
+          pill.classList.toggle("active", input.checked);
+        });
+        populateAnimals(type);
+      }
+    });
+
+    // 隨機全部
+    randomBtn.addEventListener("click", () => {
+      // 動物類型隨機
+      const radios = animalTypeGroup.querySelectorAll("input[name='animalType']");
+      const randomRadio = randomFromArray(Array.from(radios));
+      randomRadio.checked = true;
+      const type = randomRadio.value;
+
+      // 更新 pill 外觀
+      const pills = animalTypeGroup.querySelectorAll(".radio-pill");
+      pills.forEach((pill) => {
+        const input = pill.querySelector("input");
+        pill.classList.toggle("active", input.checked);
+      });
+
+      // 依新類型填入動物，並隨機選一隻
+      populateAnimals(type);
+      const allAnimals = Array.from(animalSelect.options).filter(
+        (o) => o.value
+      );
+      if (allAnimals.length > 0) {
+        randomFromArray(allAnimals).selected = true;
+      }
+
+      // 其餘欄位全部清空，交給 buildPrompt 隨機
+      sceneSelect.value = "";
+      trapSelect.value = "";
+      moodSelect.value = "";
+      cameraSelect.value = "";
+      detailSelect.value = "";
+    });
+
+    // 產生 Prompt
+    generateBtn.addEventListener("click", () => {
+      const prompt = buildPrompt();
+      promptOutput.value = prompt;
+    });
+
+    // 複製 Prompt
+    copyBtn.addEventListener("click", async () => {
+      const text = promptOutput.value.trim();
+      if (!text) {
+        alert("目前沒有 Prompt，可以先按「產生英文 Prompt」。");
         return;
-    }
+      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // 備援：選取文字
+          promptOutput.select();
+          document.execCommand("copy");
+        }
+        alert("已複製 Prompt，可以貼到 Sora 或其他工具。");
+      } catch (err) {
+        console.error(err);
+        alert("複製時發生問題，可以手動長按選取複製。");
+      }
+    });
 
-    // 優先使用 Clipboard API
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text)
-            .then(() => alert(lang.msgCopied))
-            .catch(() => fallbackCopy(text, lang.msgCopied));
-    } else {
-        fallbackCopy(text, lang.msgCopied);
-    }
-}
-
-function fallbackCopy(text, msgCopied) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.style.position = "fixed";
-    textarea.style.left = "-9999px";
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-        document.execCommand("copy");
-    } catch (e) {}
-    document.body.removeChild(textarea);
-    alert(msgCopied);
-}
-</script>
-
+    // 初始化：預設凶猛動物
+    populateAnimals("ferocious");
+  </script>
 </body>
 </html>
